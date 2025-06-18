@@ -2,17 +2,9 @@
 
 FlowTTS is a Text-to-Speech synthesis library that supports F5 and E2 model architectures. It uses either vocos or bigvgan as the vocoder.
 
-## Installation
-
-To install FlowTTS, run:
-
-```bash
-pip install .
-```
-
 ## Usage
 
-After installation, you can use FlowTTS in your Python projects to perform text-to-speech synthesis and voice conversion.
+You can use FlowTTS in your Python projects to perform text-to-speech synthesis and voice conversion.
 
 ## Features
 
