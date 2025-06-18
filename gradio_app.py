@@ -137,4 +137,4 @@ with gr.Blocks() as demo:
             outputs=[output_audio_multi]
         )
 
-demo.launch()
+demo.launch(share=True)
