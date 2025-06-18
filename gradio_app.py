@@ -104,45 +104,96 @@ with gr.Blocks() as demo:
         )
 
     with gr.Tab("Multi-Speaker"):
-        gr.Markdown("### Multi-Speaker TTS\nUpload reference audios and specify speaker labels for each segment in your script.")
-        checkpoint_input = gr.Textbox(label="Checkpoint Path", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/model_last_prune.safetensors")
-        vocab_input = gr.Textbox(label="Vocab File", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/vocab.txt")
-        nfe_input = gr.Slider(label="NFE Value", minimum=4, maximum=64, value=32, step=2)
-        speaker_labels = [gr.Textbox(label=f"Speaker {i+1} Label", value=f"Speaker{i+1}") for i in range(2)]
-        speaker_audios = [gr.Audio(label=f"Speaker {i+1} Reference Audio", type="filepath") for i in range(2)]
-        speaker_texts = [gr.Textbox(label=f"Speaker {i+1} Reference Text") for i in range(2)]
-        gen_text_multi = gr.Textbox(label="Script (use {Speaker1} and {Speaker2} to indicate speakers)")
-        output_audio_multi = gr.Audio(label="Generated Multi-Speaker Audio")
-        generate_multi_btn = gr.Button("Generate Multi-Speaker Speech")
+      gr.Markdown("### Multi-Speaker TTS\nProvide speaker references and use `{Speaker1}` or `{Speaker2}` in your script.")
 
-        def multi_speaker_inference(gen_text, speaker1_label, speaker2_label, speaker1_audio, speaker2_audio, speaker1_text, speaker2_text, checkpoint, vocab_file, nfe_step):
-            import re
-            segments = re.split(r'(\{.*?\})', gen_text)
-            speakers = {speaker1_label: (speaker1_audio, speaker1_text), speaker2_label: (speaker2_audio, speaker2_text)}
-            audio_segments = []
-            current_speaker = speaker1_label
-            for seg in segments:
-                if seg.startswith('{') and seg.endswith('}'):
-                    label = seg[1:-1].strip()
-                    if label in speakers:
-                        current_speaker = label
-                elif seg.strip():
-                    ref_audio, ref_text = speakers.get(current_speaker, (None, None))
-                    if ref_audio:
-                        audio_file, _ = inference(ref_audio, ref_text, seg.strip(), checkpoint, vocab_file, nfe_step)
-                        y, sr = librosa.load(audio_file, sr=None)
-                        audio_segments.append(y)
-            if audio_segments:
-                final_audio = np.concatenate(audio_segments)
-                temp_out = "outputs_f5/generated_multi.wav"
-                sf.write(temp_out, final_audio, sr)
-                return temp_out
-            return None
+      checkpoint_input = gr.Textbox(label="Checkpoint Path", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/model_last_prune.safetensors")
+      vocab_input = gr.Textbox(label="Vocab File", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/vocab.txt")
+      nfe_input = gr.Slider(label="NFE Value", minimum=4, maximum=64, value=32, step=2)
 
-        generate_multi_btn.click(
-            multi_speaker_inference,
-            inputs=[gen_text_multi, speaker_labels[0], speaker_labels[1], speaker_audios[0], speaker_audios[1], speaker_texts[0], speaker_texts[1], checkpoint_input, vocab_input, nfe_input],
-            outputs=[output_audio_multi]
-        )
+      speaker_labels = [gr.Textbox(label=f"Speaker {i+1} Label", value=f"Speaker{i+1}") for i in range(2)]
+      speaker_audios = [gr.Audio(label=f"Speaker {i+1} Reference Audio", type="filepath") for i in range(2)]
+      speaker_texts = [gr.Textbox(label=f"Speaker {i+1} Reference Text") for i in range(2)]
+
+      gen_text_multi = gr.Textbox(label="Script (use {Speaker1} and {Speaker2} to indicate speakers)")
+      output_audio_multi = gr.Audio(label="Generated Multi-Speaker Audio")
+      generate_multi_btn = gr.Button("Generate Multi-Speaker Speech")
+
+      def multi_speaker_inference(
+          gen_text,
+          speaker1_label, speaker2_label,
+          speaker1_audio, speaker2_audio,
+          speaker1_text, speaker2_text,
+          checkpoint, vocab_file, nfe_step
+      ):
+          import json
+          import numpy as np
+          import librosa
+          import soundfile as sf
+
+          speakers = {
+              speaker1_label.strip(): (speaker1_audio, speaker1_text),
+              speaker2_label.strip(): (speaker2_audio, speaker2_text)
+          }
+
+          audio_segments = []
+          sr = 22050  # fallback sampling rate
+
+          lines = gen_text.strip().splitlines()
+
+          for line in lines:
+              # Split JSON part and text part
+              try:
+                  # Find the first closing brace "}" to separate JSON metadata from text
+                  json_end_idx = line.index('}') + 1
+                  json_str = line[:json_end_idx]
+                  text = line[json_end_idx:].strip()
+
+                  speaker_meta = json.loads(json_str)
+                  speaker_name = speaker_meta.get("name", "").strip()
+
+                  if speaker_name not in speakers:
+                      print(f"⚠️ Unknown speaker: {speaker_name}, skipping line.")
+                      continue
+
+                  ref_audio, ref_text = speakers[speaker_name]
+
+                  if not ref_audio:
+                      print(f"⚠️ Missing reference audio for {speaker_name}, skipping line.")
+                      continue
+
+                  if not text:
+                      print("⚠️ Empty text after speaker metadata, skipping line.")
+                      continue
+
+                  # Call your TTS inference
+                  audio_file, _ = inference(ref_audio, ref_text, text, checkpoint, vocab_file, nfe_step)
+
+                  # Load generated audio and append
+                  y, sr = librosa.load(audio_file, sr=None)
+                  audio_segments.append(y)
+
+              except (ValueError, json.JSONDecodeError) as e:
+                  print(f"⚠️ Error parsing line: {line}\nError: {e}")
+                  continue
+
+          if audio_segments:
+              final_audio = np.concatenate(audio_segments)
+              temp_out = "outputs_f5/generated_multi.wav"
+              sf.write(temp_out, final_audio, sr)
+              return temp_out
+          else:
+              return None
+
+      generate_multi_btn.click(
+          fn=multi_speaker_inference,
+          inputs=[
+              gen_text_multi,
+              speaker_labels[0], speaker_labels[1],
+              speaker_audios[0], speaker_audios[1],
+              speaker_texts[0], speaker_texts[1],
+              checkpoint_input, vocab_input, nfe_input
+          ],
+          outputs=[output_audio_multi]
+      )
 
 demo.launch(share=True)
