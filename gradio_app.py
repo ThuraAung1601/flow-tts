@@ -105,6 +105,9 @@ with gr.Blocks() as demo:
 
     with gr.Tab("Multi-Speaker"):
         gr.Markdown("### Multi-Speaker TTS\nUpload reference audios and specify speaker labels for each segment in your script.")
+        checkpoint_input = gr.Textbox(label="Checkpoint Path", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/model_last_prune.safetensors")
+        vocab_input = gr.Textbox(label="Vocab File", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/vocab.txt")
+        nfe_input = gr.Slider(label="NFE Value", minimum=4, maximum=64, value=32, step=2)
         speaker_labels = [gr.Textbox(label=f"Speaker {i+1} Label", value=f"Speaker{i+1}") for i in range(2)]
         speaker_audios = [gr.Audio(label=f"Speaker {i+1} Reference Audio", type="filepath") for i in range(2)]
         speaker_texts = [gr.Textbox(label=f"Speaker {i+1} Reference Text") for i in range(2)]
