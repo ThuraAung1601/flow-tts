@@ -75,7 +75,7 @@ def inference(ref_audio, ref_text, gen_text, checkpoint, vocab_file, nfe_step):
     return output_file, mel_spectrogram_file
 
 with gr.Blocks() as demo:
-    gr.Image(value="/Users/thuraaung/Downloads/f5-tts-inference/Screen_Shot_2025-06-17_at_2.48.46_PM.png", 
+    gr.Image(value="./Screen_Shot_2025-06-17_at_2.48.46_PM.png", 
              show_label=False, container=False, width=400)
 
     gr.Markdown("## ThonburianTTS Demo 🇹🇭\nGenerate speech from Thai text with reference voice and visualize the Mel spectrogram.")
@@ -84,7 +84,7 @@ with gr.Blocks() as demo:
         checkpoint_input = gr.Textbox(label="Checkpoint Path", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/model_last_prune.safetensors")
         vocab_input = gr.Textbox(label="Vocab File", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/vocab.txt")
         nfe_input = gr.Slider(label="NFE Value", minimum=4, maximum=64, value=32, step=2)
-        ref_audio = gr.Audio(label="Reference Audio", type="filepath", value="/Users/thuraaung/Downloads/f5-tts-inference/000000.wav")
+        ref_audio = gr.Audio(label="Reference Audio", type="filepath", value="./000000.wav")
         ref_text = gr.Textbox(label="Reference Text", value="ใครเป็นผู้รับ")
         gen_text = gr.Textbox(label="Text to Generate")
         output_audio = gr.Audio(label="Generated Audio")
