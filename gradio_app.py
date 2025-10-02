@@ -87,8 +87,8 @@ with gr.Blocks() as demo:
     gr.Markdown("## ThonburianTTS Demo 🇹🇭\nGenerate speech from Thai text with reference voice and visualize the Mel spectrogram.")
 
     with gr.Tab("TTS"):
-        checkpoint_input = gr.Textbox(label="Checkpoint Path", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/model_last_prune.safetensors")
-        vocab_input = gr.Textbox(label="Vocab File", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/vocab.txt")
+        checkpoint_input = gr.Textbox(label="Checkpoint Path", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/mega_f5_last.safetensors")
+        vocab_input = gr.Textbox(label="Vocab File", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/mega_vocab.txt")
         nfe_input = gr.Slider(label="NFE Value", minimum=4, maximum=64, value=32, step=2)
         ref_audio = gr.Audio(label="Reference Audio", type="filepath", value=default_audio_path)
         ref_text = gr.Textbox(label="Reference Text", value="ใครเป็นผู้รับ")
