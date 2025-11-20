@@ -20,6 +20,7 @@ else:
 # Set base path for relative files
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 logo_path = os.path.join(SCRIPT_DIR, "app_logo.png")
+pipeline_path = os.path.join(SCRIPT_DIR, "pipeline.png")
 default_audio_path = os.path.join(SCRIPT_DIR, "000000.wav")
 
 # Initialize Whisper model for transcription
@@ -117,6 +118,16 @@ with gr.Blocks() as demo:
         vocab_input = gr.Textbox(label="Vocab File", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/vocab.txt")
         nfe_input = gr.Slider(label="NFE Value", minimum=4, maximum=64, value=32, step=2)
         
+        # Add pipeline diagram
+        gr.Image(value=pipeline_path, show_label=False, container=False)
+        
+        # Add disclaimer
+        gr.Markdown("""
+        **⚠️ Disclaimer:** The TTS model performance depends on the quality of reference audio and text. 
+        For best results, please provide clear audio with minimal background noise and accurate transcription text. 
+        The reference audio should be 3-10 seconds long and contain natural speech patterns.
+        """)
+        
         with gr.Row():
             ref_audio = gr.Audio(label="Reference Audio", type="filepath", sources=["microphone", "upload"], value=default_audio_path)
             ref_text = gr.Textbox(label="Reference Text", value="ใครเป็นผู้รับ")
@@ -147,6 +158,16 @@ with gr.Blocks() as demo:
         checkpoint_input_multi = gr.Textbox(label="Checkpoint Path", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/model_last_prune.safetensors")
         vocab_input_multi = gr.Textbox(label="Vocab File", value="hf://ThuraAung1601/E2-F5-TTS/F5_Thai/vocab.txt")
         nfe_input_multi = gr.Slider(label="NFE Value", minimum=4, maximum=64, value=32, step=2)
+
+        # Add pipeline diagram for multi-speaker
+        gr.Image(value=pipeline_path, show_label=False, container=False)
+        
+        # Add disclaimer for multi-speaker
+        gr.Markdown("""
+        **⚠️ Disclaimer:** The TTS model performance depends on the quality of reference audio and text. 
+        For best results, please provide clear audio with minimal background noise and accurate transcription text. 
+        The reference audio should be 3-10 seconds long and contain natural speech patterns.
+        """)
 
         speaker_labels = [gr.Textbox(label=f"Speaker {i+1} Label", value=f"Speaker{i+1}") for i in range(2)]
         
