@@ -19,8 +19,8 @@ else:
 
 # Set base path for relative files
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-logo_path = os.path.join(SCRIPT_DIR, "app_logo.png")
-pipeline_path = os.path.join(SCRIPT_DIR, "pipeline.png")
+logo_path = os.path.join(SCRIPT_DIR, "app-logo.png")
+pipeline_path = os.path.join(SCRIPT_DIR, "tts-workflow.png")
 default_audio_path = os.path.join(SCRIPT_DIR, "000000.wav")
 
 # Initialize Whisper model for transcription
